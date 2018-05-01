@@ -15,14 +15,14 @@ type bucket struct {
 	entries [][]interface{}
 }
 
-// dumbhashmap : a basic implementation of Go's builtin hashmap
-type dumbhashmap struct {
+// Dumbhashmap : a basic implementation of Go's builtin hashmap
+type Dumbhashmap struct {
 	buckets []bucket
 }
 
-// New : create a new dumbhashmap
-func New() (h *dumbhashmap) {
-	return &dumbhashmap{make([]bucket, bucketCnt)}
+// New : create a new Dumbhashmap
+func New() (h *Dumbhashmap) {
+	return &Dumbhashmap{make([]bucket, bucketCnt)}
 }
 
 func hash(key string) uint32 {
@@ -41,7 +41,7 @@ func hash(key string) uint32 {
 }
 
 // Get : retrieve the value stored for a given key.
-func (h dumbhashmap) Get(key string) interface{} {
+func (h Dumbhashmap) Get(key string) interface{} {
 	b := h.buckets[hash(key)]
 	if len(b.entries) == 0 {
 		return nil
@@ -57,12 +57,24 @@ func (h dumbhashmap) Get(key string) interface{} {
 }
 
 // Set : set a value for the given key
-func (h dumbhashmap) Set(key string, value interface{}) {
+func (h Dumbhashmap) Set(key string, value interface{}) {
 	b := &h.buckets[hash(key)]
 	b.entries = append(b.entries, []interface{}{key, value})
 }
 
-func (h dumbhashmap) String() string {
+// Unset : unset any stored value for the given key
+func (h Dumbhashmap) Unset(key string) (ok bool) {
+	b := &h.buckets[hash(key)]
+	for i, e := range b.entries {
+		if e[0] == key {
+			ok = true
+			b.entries = append(b.entries[:i], b.entries[i+1:]...)
+		}
+	}
+	return ok
+}
+
+func (h Dumbhashmap) String() string {
 	var strValue = ""
 	for i, b := range h.buckets {
 		strValue += fmt.Sprintf("%v{", i)
@@ -73,7 +85,7 @@ func (h dumbhashmap) String() string {
 	}
 
 	if strValue == "" {
-		return "<empty dumbhashmap>"
+		return "<empty Dumbhashmap>"
 	}
 	return strValue
 }

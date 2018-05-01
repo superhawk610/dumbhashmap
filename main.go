@@ -13,35 +13,54 @@ const (
 )
 
 func main() {
+	benchmark()
+}
+
+func benchmark() {
 	keys := make([]string, load)
 	for i := 0; i < load; i++ {
 		keys[i] = randstr.Get(6)
 	}
 
+	/* ---------- Set ---------- */
 	step := time.Now()
 	dh := dumbhashmap.New()
 	for i := 0; i < load; i++ {
-		dh.Set(keys[i], randstr.Get(6))
+		dh.Set(keys[i], keys[i])
 	}
 	fmt.Printf("dumbhashmap store %v items: %v\n", load, time.Since(step))
 
 	step = time.Now()
-	h := make(map[string]string)
+	m := make(map[string]string)
 	for i := 0; i < load; i++ {
-		h[keys[i]] = randstr.Get(6)
+		m[keys[i]] = keys[i]
 	}
-	fmt.Printf("native map store %v items: %v\n\n", load, time.Since(step))
+	fmt.Printf(" native map store %v items: %v\n\n", load, time.Since(step))
 
-	foo := ""
+	/* ---------- Get ---------- */
+	var foo string
 	step = time.Now()
 	for i := 0; i < load; i++ {
-		foo += dh.Get(keys[i]).(string)
+		foo = dh.Get(keys[i]).(string)
 	}
-	fmt.Printf("dumbhashmap get %v items: %v\n", load, time.Since(step))
+	fmt.Printf("  dumbhashmap get %v items: %v\n", load, time.Since(step))
 
 	step = time.Now()
 	for i := 0; i < load; i++ {
-		foo += h[keys[i]]
+		foo = m[keys[i]]
 	}
-	fmt.Printf("native map get %v items: %v\n", load, time.Since(step))
+	fmt.Printf("   native map get %v items: %v\n\n", load, time.Since(step))
+	_ = foo
+
+	/* --------- Unset --------- */
+	step = time.Now()
+	for i := 0; i < load; i++ {
+		dh.Unset(keys[i])
+	}
+	fmt.Printf("dumbhashmap unset %v items: %v\n", load, time.Since(step))
+
+	for i := 0; i < load; i++ {
+		delete(m, keys[i])
+	}
+	fmt.Printf(" native map unset %v items: %v\n", load, time.Since(step))
 }
