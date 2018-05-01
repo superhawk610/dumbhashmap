@@ -11,3 +11,5 @@ Preliminary testing has led to some... interesting results.
 ![benchmark_1](img/15000.png)
 
 ![benchmark_2](img/150000.png)
+
+It appears that this very basic, non-optimized implementation is consistently out-performing the native implementation, at reads and writes. Further testing to come.
